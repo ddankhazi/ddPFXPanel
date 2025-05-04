@@ -1,0 +1,620 @@
+// Define "Stroke A" and "Brush A" from Selection
+global proc ddDefBrushA()
+{
+    string $strokes[] = `ls -sl`;
+    
+    for ($each in $strokes)
+    {
+        select $each;
+        string $stroke[] = `pickWalk -d down`;
+        //print $stroke[0];
+        saveAttrPreset $stroke[0] "tempStrokeA" false;
+        
+        select $each;
+        string $brush[] = `listHistory -pruneDagObjects true`;
+        //print $brush[0];        
+        saveAttrPreset $brush[0] "tempBrushA" false;
+    }
+}
+
+// Define "Stroke B" and "Brush B" from Selection
+global proc ddDefBrushB()
+{
+    string $strokes[] = `ls -sl`;
+    
+    for ($each in $strokes)
+    {
+        select $each;
+        string $stroke[] = `pickWalk -d down`;
+        //print $stroke[0];
+        saveAttrPreset $stroke[0] "tempStrokeB" false;
+        
+        select $each;
+        string $brush[] = `listHistory -pruneDagObjects true`;
+        //print $brush[0];        
+        saveAttrPreset $brush[0] "tempBrushB" false;
+    }
+}
+
+//Duplicate Stroke and Apply Presets
+global proc ddDupliA()
+{
+    duplicate -rr -ic;
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $j;
+        int $k;
+        
+        // Get index of Stroke node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "stroke" $connections[$i]`)
+            {
+                $j = $i;
+                //print ("yep " + $connections[$i] + " is a stroke\n");
+                //setAttr ($selSpec[0] + ".visibility") 1;
+            }            
+        }
+
+        // Get index of Brush node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "brush" $connections[$i]`)
+            {
+                $k = $i;
+                //print ("yep " + $connections[$i] + " is a brush\n");
+                //setAttr ($selSpec[0] + ".visibility") 1;
+            }
+            
+        }
+        
+        // Set Attributes for Stroke nodes
+        applyPresetToNode $connections[$j] "" "" "tempStrokeB" 1;
+        
+        // Set Attributes for Brush nodes
+        applyPresetToNode $connections[$k] "" "" "tempBrushB" 1;
+
+        rename $each "strokeB";  
+    }
+    //select $sel;
+}
+
+//Duplicate Stroke and Apply Presets
+global proc ddDupliB()
+{
+    duplicate -rr -ic;
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $j;
+        int $k;
+        
+        // Get index of Stroke node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "stroke" $connections[$i]`)
+            {
+                $j = $i;
+                //print ("yep " + $connections[$i] + " is a stroke\n");
+                //setAttr ($selSpec[0] + ".visibility") 1;
+            }            
+        }
+
+        // Get index of Brush node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "brush" $connections[$i]`)
+            {
+                $k = $i;
+                //print ("yep " + $connections[$i] + " is a brush\n");
+                //setAttr ($selSpec[0] + ".visibility") 1;
+            }
+            
+        }
+        
+        // Set Attributes for Stroke nodes
+        applyPresetToNode $connections[$j] "" "" "tempStrokeA" 1;
+        
+        // Set Attributes for Brush nodes
+        applyPresetToNode $connections[$k] "" "" "tempBrushA" 1;
+
+        rename $each "strokeA";  
+    }
+    //select $sel;
+}
+
+
+//Apply "Brush B" Preset
+global proc ddApplyBrush()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $j;
+        int $k;
+        
+        // Get index of Stroke node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "stroke" $connections[$i]`)
+            {
+                $j = $i;
+                //print ("yep " + $connections[$i] + " is a stroke\n");
+                //setAttr ($selSpec[0] + ".visibility") 1;
+            }            
+        }
+
+        // Get index of Brush node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "brush" $connections[$i]`)
+            {
+                $k = $i;
+                //print ("yep " + $connections[$i] + " is a brush\n");
+                //setAttr ($selSpec[0] + ".visibility") 1;
+            }
+            
+        }
+        
+        // Set Attributes for Stroke nodes
+        applyPresetToNode $connections[$j] "" "" "tempStrokeB" 1;
+        
+        // Set Attributes for Brush nodes
+        applyPresetToNode $connections[$k] "" "" "tempBrushB" 1;
+
+        rename $each "strokeB";  
+    }
+    //select $sel;
+}
+
+
+//Apply "Stroke A" and "Brush A" Preset
+global proc ddApplyStrokeAndBrush()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $j;
+        int $k;
+        
+        // Get index of Stroke node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "stroke" $connections[$i]`)
+            {
+                $j = $i;
+                //print ("yep " + $connections[$i] + " is a stroke\n");
+                //setAttr ($selSpec[0] + ".visibility") 1;
+            }            
+        }
+
+        // Get index of Brush node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "brush" $connections[$i]`)
+            {
+                $k = $i;
+                //print ("yep " + $connections[$i] + " is a brush\n");
+                //setAttr ($selSpec[0] + ".visibility") 1;
+            }
+            
+        }
+        
+        // Set Attributes for Stroke nodes
+        applyPresetToNode $connections[$j] "" "" "tempStrokeA" 1;
+        
+        // Set Attributes for Brush nodes
+        applyPresetToNode $connections[$k] "" "" "tempBrushA" 1;
+        rename $each "strokeA"; 
+    }
+    //select $sel;
+}
+
+
+//Randomise Stroke Seed
+global proc ddRndSeed()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $j;        
+        // Get index of Stroke node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "stroke" $connections[$i]`)
+            {
+                $j = $i;
+                //print ("yep " + $connections[$i] + " is a stroke\n");
+                //setAttr ($selSpec[0] + ".visibility") 1;
+            }            
+        }
+
+        // Set Attributes for Stroke nodes
+        int $rnd = rand(0,999);
+        setAttr ($connections[$j] + ".seed") $rnd;       
+    }
+    //select $sel;
+}
+
+//Randomise Brush Noise
+global proc ddRndNoise()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $k;
+        // Get index of Brush node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "brush" $connections[$i]`)
+            {
+                $k = $i;
+                //print ("yep " + $connections[$i] + " is a brush\n");
+            }
+            
+        }        
+        // Set Attributes for Brush nodes        
+        setAttr ($connections[$k]+".random") (rand(0.01,5.0)); 
+    }
+    //select $sel;
+}
+
+
+//Increase Steps
+global proc ddIncSteps()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $k;
+        // Get index of Brush node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "brush" $connections[$i]`)
+            {
+                $k = $i;
+                //print ("yep " + $connections[$i] + " is a brush\n");
+            }
+            
+        }        
+        // Set Attributes for Brush nodes
+        float $steps = `getAttr ($connections[$k]+".tubesPerStep")`;
+        $steps += 0.05; 
+        setAttr ($connections[$k]+".tubesPerStep") $steps;  
+    }
+    //select $sel;
+}
+
+//Increase Steps 10×
+global proc ddIncStepsStrong()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $k;
+        // Get index of Brush node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "brush" $connections[$i]`)
+            {
+                $k = $i;
+                //print ("yep " + $connections[$i] + " is a brush\n");
+            }
+            
+        }        
+        // Set Attributes for Brush nodes
+        float $steps = `getAttr ($connections[$k]+".tubesPerStep")`;
+        $steps += 0.5; 
+        setAttr ($connections[$k]+".tubesPerStep") $steps;  
+    }
+    //select $sel;
+}
+
+
+//Decrease Steps
+global proc ddDecSteps()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $k;
+        // Get index of Brush node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "brush" $connections[$i]`)
+            {
+                $k = $i;
+                //print ("yep " + $connections[$i] + " is a brush\n");
+            }
+            
+        }        
+        // Set Attributes for Brush nodes
+        float $steps = `getAttr ($connections[$k]+".tubesPerStep")`;
+        $steps -= 0.05; 
+        setAttr ($connections[$k]+".tubesPerStep") $steps;
+        
+    }
+    //select $sel;
+}
+
+//Decrease Steps 10×
+global proc ddDecStepsStrong()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $k;
+        // Get index of Brush node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "brush" $connections[$i]`)
+            {
+                $k = $i;
+                //print ("yep " + $connections[$i] + " is a brush\n");
+            }
+            
+        }        
+        // Set Attributes for Brush nodes
+        float $steps = `getAttr ($connections[$k]+".tubesPerStep")`;
+        $steps -= 0.5; 
+        setAttr ($connections[$k]+".tubesPerStep") $steps;
+        
+    }
+    //select $sel;
+}
+
+// Disable Visibilty for all Strokes
+global proc ddHideAllStrokes()
+{
+    string $allStroke[] =`ls -type "stroke"`;
+    for ($each in $allStroke)
+    {
+        setAttr ($each + ".visibility") 0;
+    }
+}
+
+// Enable Visibilty for all Strokes
+global proc ddShowAllStrokes()
+{
+    string $allStroke[] =`ls -type "stroke"`;
+    for ($each in $allStroke)
+    {
+        setAttr ($each + ".visibility") 1;
+    }
+}
+
+// Disable Visibilty for Selected Strokes
+global proc ddHideStrokes()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $j;        
+        // Get index of Stroke node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "stroke" $connections[$i]`)
+            {
+                $j = $i;
+                //print ("yep " + $connections[$i] + " is a stroke\n");
+            }            
+        }        
+        // Set Attributes for Stroke nodes
+        setAttr ($connections[$j] + ".visibility") 0;
+        //setAttr ($connections[$j] + ".visibility") 1; 
+    }
+    //select $sel;
+}
+
+
+// Enable Visibilty for Selected Strokes
+global proc ddShowStrokes()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print "\n";
+        
+        int $i;
+        int $j;        
+        // Get index of Stroke node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "stroke" $connections[$i]`)
+            {
+                $j = $i;
+                //print ("yep " + $connections[$i] + " is a stroke\n");
+                setAttr ($connections[$j] + ".visibility") 1; 
+            }
+            else
+            {
+                select $each;
+                string $stroke[] = `pickWalk -d down`;
+                setAttr ($stroke[0] + ".visibility") 1;                
+            }            
+        }
+    }
+    select $sel;
+}
+
+// Convert To Poly
+global proc ddPfxToPoly()
+{
+    doPaintEffectsToPoly( 1,1,1,1,0);
+}
+
+// Turn on Arnold vertex color export for selected objects
+global proc ddArnoldVTXOn()
+{
+    string $sel[] = `ls -sl -dag -lf`;
+    //print $sel;
+    
+    for ($each in $sel)
+    {
+        //string $mesh[] = `listRelatives -s $each`;
+        setAttr ($each + ".aiExportColors") 1;
+    }
+    
+}
+
+
+
+// Set pfxToon effect for the selected camera
+global proc ddPfxToCam()
+{
+    string $selCam[] = `ls -sl`;
+    print $selCam;
+
+    string $pfxAll[] = `ls -type "pfxToon"`;
+    print $pfxAll;
+
+    for ($each in $pfxAll)
+    {
+    connectAttr -f ($selCam[0] + ".translate") ($each + ".cameraPoint");
+    }
+}
+
+
+
+
+
+//////////// GUI ////////////////
+if (`control -exists ddPFXpanel`)deleteUI -control ddPFXpanel;
+
+global proc ddPFXpanel()
+{
+    gridLayout -numberOfColumns 2 -cellWidthHeight 130 40;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "paintEffectsBrushesLarge.png" -bgc 0.4 0.4 0.4 -annotation "Get Brush" -label "Get Brush" -command PfxGetBrush;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "makePaintable.png" -bgc 0.3 0.3 0.3 -annotation "Make Paintable" -label "Make Paintable" -command MakePaintable;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "templateBrushSettings.png" -bgc 0.4 0.4 0.4 -annotation "Get Settings From Selected Stroke" -label "Get Settings" -command GetSettingsFromSelectedStroke;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "hairCollide.png" -bgc 0.3 0.3 0.3 -annotation "Make Collide" -label "Make Collide" -command makeCollidePaintEffects;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "menuIconDeformations.png" -bgc 0.7 0.7 0.7 -annotation "Share One Brush" -label "Share One Brush" -command ShareOneBrush;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "menuIconDeformations.png" -bgc 0.7 0.7 0.7 -annotation "Remove Brush Sharing" -label "Remove Sharing" -command RemoveBrushSharing;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.5 0.5 -annotation "Define \"Stroke A\" and \"Brush A\" from Selection" -label "Define \"A\" \nfrom Selection" -command ddDefBrushA;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.5 0.7 -annotation "Define \"Stroke B\" and \"Brush B\" from Selection" -label "Define \"B\" \nfrom Selection" -command ddDefBrushB;
+    
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.7 0.9 0.5 -annotation "Duplicate as \"A\" Preset" -label "Duplicate as \"A\" Preset" -command ddDupliB;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.8 1.0 0.6 -annotation "Duplicate as \"B\" Preset" -label "Duplicate as \"B\" Preset" -command ddDupliA;
+    
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.7 0.9 0.5 -annotation "Apply \"A\" Preset" -label "Apply \"A\" Preset" -command ddApplyStrokeAndBrush;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.8 1.0 0.6 -annotation "Apply \"B\" Preset" -label "Apply \"B\" Preset" -command ddApplyBrush;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.8 0.5 -annotation "Randomise Stroke Seed" -label "Randomise \nStroke Seed" -command ddRndSeed;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.8 0.5 -annotation "Randomise Noise" -label "Randomise \nNoise" -command ddRndNoise;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.8 0.5 -annotation "Increase Steps / DoubleClick: Strong Version" -label "Increase Steps /\nStrong" -command ddIncSteps -doubleClickCommand ddIncStepsStrong;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.8 0.5 -annotation "Decrease Steps / DoubleClick: Strong Version" -label "Decrease Steps /\nStrong" -command ddDecSteps -doubleClickCommand ddDecStepsStrong;
+
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.7 0.7 0.7 -annotation "Attach Brush Node to Selected Curves" -label "Attach Brush to Curves" -command convertCurvesToStrokes;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.7 0.7 0.7 -annotation "Reset PFX Brush. Set the PFX Draw Tool to the Default simple Brush." -label "Reset PFX Brush" -command resetBrush;;
+
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.4 0.4 0.4 -annotation "Disable Visibilty for Selected Strokes" -label "Hide Selected Strokes" -command ddHideStrokes;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.5 0.5 0.5 -annotation "Enable Visibilty for Selected Strokes" -label "Show Selected Strokes" -command ddShowStrokes;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.2 0.2 0.2 -annotation "Disable Visibilty for all Strokes" -label "Hide All Strokes" -command ddHideAllStrokes;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.3 0.3 0.3 -annotation "Enable Visibilty for all Strokes" -label "Show All Strokes" -command ddShowAllStrokes;
+
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "paintEffectsTool.png" -bgc 0.3 0.3 0.3 -annotation "PFX Tool" -label "PFX Tool" -command PaintEffectsTool;  
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "paintFXtoPoly.png" -bgc 0.2 0.2 0.2 -annotation "Convert To Polygon" -label "Convert To Poly" -command ddPfxToPoly;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.6 0.6 0.9 -annotation "Turn on Arnold vertex color export for selected objects" -label "Set Arnold \nVTX Color" -command ddArnoldVTXOn;
+
+
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.2 0.2 0.2 -annotation "Set PfxToon Effect to Selected Camera" -label "Set PfxToon Effect \nto Selected Camera" -command ddPfxToCam;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.2 0.2 0.2 -annotation "Open PFX Library" -label "Open PFX Library" -command "source \"ddPFXLib.mel\"";
+
+    
+    
+    
+}
+
+workspaceControl -label "ddPFX Panel v0.2" -retain false -floating true -uiScript "ddPFXpanel(); " ddPFXpanel;
