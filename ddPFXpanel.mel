@@ -568,8 +568,75 @@ global proc ddPfxToCam()
 }
 
 
+global proc ddUnlimitedPFXSegments()
+{
+    string $sel[] = `ls -type "stroke"`;
+    for ($item in $sel)
+    {
+        setAttr ($item + ".maxDrawSegments") 0;
+    }
+}
 
 
+// Paint Effects Based Intersection Detector
+global proc ddPFXIntersectionDetector()
+{
+    string $sceneBefore[] = `ls -type transform`;
+    //print $sceneBefore;
+    //print "\n";
+    
+    int $objectCount = `size $sceneBefore`;
+    //print $objectCount;
+    //print "\n";
+    
+    assignNewPfxToon;
+    
+    string $sceneNow[] = `ls -type transform`;
+    int $objectCountNow = `size $sceneNow`;
+    //print $objectCountNow;
+    //print "\n";
+    
+    
+    if ($objectCountNow > $objectCount)
+    {
+        //print "\n igen, több objektum van";
+        int $diffNum = $objectCountNow - $objectCount;
+        //print "\n a új objektumok száma: ";
+        //print $diffNum;
+        string $newObjs[]=`ls -sl -tail $diffNum`;
+        //print "\n az eredeti objektumok listája: ";
+        //print $newObjs;
+        select $newObjs;
+    }
+    
+    string $sel[] = `ls -sl`;
+    for ($item in $sel)
+        {
+        select $item;
+        setAttr ($item + ".creaseLines") 0;
+        setAttr ($item + ".borderLines") 0;
+        setAttr ($item + ".intersectionLines") 1;
+        setAttr ($item + ".intersectionColor") -type double3 1 0 1 ;
+        setAttr ($item + ".occlusionWidthScale") 0;
+        setAttr ($item + ".profileLineWidth") 0;
+        setAttr ($item + ".selfIntersect") 1;
+        setAttr ($item + ".profileLines") 0;
+        
+        string $pfxTransform[] = `listRelatives -parent` ;
+        print $pfxTransform[0];
+        print "\n";
+        string $currentpfxTrn = $pfxTransform[0];
+        addAttr -ln "lineWith"  -at double  -min 0 -max 500 -dv 1 $pfxTransform[0];
+        setAttr -e-keyable true ($pfxTransform[0] + ".lineWith");
+        connectAttr -f ($pfxTransform[0] + ".lineWith") ($item + ".intersectionLineWidth");
+        
+        addAttr -ln "selfIntersect"  -at bool  $pfxTransform[0];
+        setAttr -e-keyable true ($pfxTransform[0] + ".selfIntersect");
+        setAttr ( $pfxTransform[0]+ ".selfIntersect") 1;
+        connectAttr -f ($pfxTransform[0] + ".selfIntersect") ($item + ".selfIntersect");
+            
+        }
+}
 
 //////////// GUI ////////////////
 if (`control -exists ddPFXpanel`)deleteUI -control ddPFXpanel;
@@ -606,14 +673,13 @@ global proc ddPFXpanel()
 
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "paintEffectsTool.png" -bgc 0.3 0.3 0.3 -annotation "PFX Tool" -label "PFX Tool" -command PaintEffectsTool;  
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "paintFXtoPoly.png" -bgc 0.2 0.2 0.2 -annotation "Convert To Polygon" -label "Convert To Poly" -command ddPfxToPoly;
+    
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.6 0.6 0.9 -annotation "Turn on Arnold vertex color export for selected objects" -label "Set Arnold \nVTX Color" -command ddArnoldVTXOn;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.3 0.3 0.5 -annotation "Unlimited Segments for the Selected PFX Strokes" -label "Unlimited PFX \nSegments" -command ddUnlimitedPFXSegments;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.3 0.3 0.5 -annotation "Paint Effects Based Intersection Detector" -label "PFX Intersection \nDetector" -command ddPFXIntersectionDetector;
 
-
-    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.2 0.2 0.2 -annotation "Set PfxToon Effect to Selected Camera" -label "Set PfxToon Effect \nto Selected Camera" -command ddPfxToCam;
-    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.2 0.2 0.2 -annotation "Open PFX Library" -label "Open PFX Library" -command "source \"ddPFXLib.mel\"";
-
-    
-    
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.3 0.3 0.5 -annotation "Set PfxToon Effect to Selected Camera" -label "Set PfxToon Effect \nto Selected Camera" -command ddPfxToCam;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.8 0.8 0.8 -annotation "Open PFX Library" -label "Open PFX Library" -command "source \"ddPFXLib.mel\"";
     
 }
 
