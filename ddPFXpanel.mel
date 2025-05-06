@@ -277,8 +277,8 @@ global proc ddRndSeed()
     //select $sel;
 }
 
-//Randomise Brush Noise
-global proc ddRndNoise()
+//Increase Brush Noise
+global proc ddRndNoiseInc()
 {
     // List selected objects
     string $sel[] = `ls -sl`;
@@ -302,8 +302,61 @@ global proc ddRndNoise()
             }
             
         }        
-        // Set Attributes for Brush nodes        
-        setAttr ($connections[$k]+".random") (rand(0.01,5.0)); 
+        // Set Attributes for Brush nodes
+        float $rndPFX = `getAttr ($connections[$k]+".random")`; 
+        if ($rndPFX == 0)
+        {
+            $rndPFX = 0.5;
+            setAttr ($connections[$k]+".random") $rndPFX; 
+        }
+        
+        else
+        { 
+            $rndPFX = $rndPFX + ($rndPFX*0.5);
+            setAttr ($connections[$k]+".random") $rndPFX; 
+        } 
+    }
+    //select $sel;
+}
+
+//Decrease Brush Noise
+global proc ddRndNoiseDec()
+{
+    // List selected objects
+    string $sel[] = `ls -sl`;
+    
+    for ($each in $sel) 
+    {   
+        // List full all nodes for each 
+        string $connections[] = `listHistory -allConnections $each`;
+        //print $connections;
+        //print "\n";
+        
+        int $i;
+        int $k;
+        // Get index of Brush node
+        for ($i = 0; $i < (`size($connections)`); $i++)
+        {
+            if (`objectType -isType "brush" $connections[$i]`)
+            {
+                $k = $i;
+                //print ("yep " + $connections[$i] + " is a brush\n");
+            }
+            
+        }        
+        // Set Attributes for Brush nodes
+        float $rndPFX = `getAttr ($connections[$k]+".random")`;
+        if ($rndPFX == 0)
+        {
+            $rndPFX = $rndPFX;
+            setAttr ($connections[$k]+".random") $rndPFX; 
+        }
+        
+        else
+        { 
+            $rndPFX = $rndPFX - ($rndPFX*0.5);
+            setAttr ($connections[$k]+".random") $rndPFX; 
+        }
     }
     //select $sel;
 }
@@ -336,7 +389,7 @@ global proc ddIncSteps()
         }        
         // Set Attributes for Brush nodes
         float $steps = `getAttr ($connections[$k]+".tubesPerStep")`;
-        $steps += 0.05; 
+        $steps = $steps + ($steps*0.05);  
         setAttr ($connections[$k]+".tubesPerStep") $steps;  
     }
     //select $sel;
@@ -369,7 +422,7 @@ global proc ddIncStepsStrong()
         }        
         // Set Attributes for Brush nodes
         float $steps = `getAttr ($connections[$k]+".tubesPerStep")`;
-        $steps += 0.5; 
+        $steps = $steps + ($steps*0.5); 
         setAttr ($connections[$k]+".tubesPerStep") $steps;  
     }
     //select $sel;
@@ -403,7 +456,7 @@ global proc ddDecSteps()
         }        
         // Set Attributes for Brush nodes
         float $steps = `getAttr ($connections[$k]+".tubesPerStep")`;
-        $steps -= 0.05; 
+        $steps = $steps - ($steps*0.05); ; 
         setAttr ($connections[$k]+".tubesPerStep") $steps;
         
     }
@@ -437,7 +490,7 @@ global proc ddDecStepsStrong()
         }        
         // Set Attributes for Brush nodes
         float $steps = `getAttr ($connections[$k]+".tubesPerStep")`;
-        $steps -= 0.5; 
+        $steps = $steps - ($steps*0.5); 
         setAttr ($connections[$k]+".tubesPerStep") $steps;
         
     }
@@ -551,6 +604,36 @@ global proc ddArnoldVTXOn()
 }
 
 
+// Assign Shader + connect UserDataColor and Set Attributes
+
+global proc ddPFXAssignShaderVC()
+{
+string $objects[] = `ls -sl`;
+for ($object in $objects)
+    {
+        setAttr ($object + ".aiExportColors") 1;
+        $shaderType = "aiStandardSurface";
+        string $shadingNode = `shadingNode -asShader $shaderType -name ($object + "_MAT")`;
+        print ("Created and assigned " + $shadingNode + " for " + $object + "\n");
+        
+        setAttr ($shadingNode+".baseColorR") (rand(0.2 ,0.8));
+        setAttr ($shadingNode+".baseColorG") (rand(0.2 ,0.8));
+        setAttr ($shadingNode+".baseColorB") (rand(0.2 ,0.8));
+        
+        string $shaderGroup = `sets -renderable true -noSurfaceShader true -empty -name ($shadingNode + "SG")`;
+        connectAttr -f ($shadingNode + ".outColor") ($shadingNode + "SG.surfaceShader");
+    
+        select -r $object;
+        sets -e -forceElement $shaderGroup;
+        
+        string $userDataNode = `shadingNode -asUtility aiUserDataColor`;
+        setAttr -type "string" ($userDataNode + ".attribute") "colorSet1";
+        connectAttr -f ($userDataNode + ".outColor") ($shadingNode + ".baseColor");
+        setAttr ($shadingNode +".specularRoughness") 0.5;  
+    } 
+select $objects;
+}
+
 
 // Set pfxToon effect for the selected camera
 global proc ddPfxToCam()
@@ -659,7 +742,7 @@ global proc ddPFXpanel()
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.7 0.9 0.5 -annotation "Apply \"A\" Preset" -label "Apply \"A\" Preset" -command ddApplyStrokeAndBrush;
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.8 1.0 0.6 -annotation "Apply \"B\" Preset" -label "Apply \"B\" Preset" -command ddApplyBrush;
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.8 0.5 -annotation "Randomise Stroke Seed" -label "Randomise \nStroke Seed" -command ddRndSeed;
-    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.8 0.5 -annotation "Randomise Noise" -label "Randomise \nNoise" -command ddRndNoise;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.8 0.5 -annotation "Increase Random Noise, Double Click: Decrease Random Noise" -label "Increase Randomness \n/Decrease Randomness" -command ddRndNoiseInc -doubleClickCommand ddRndNoiseDec;
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.8 0.5 -annotation "Increase Steps / DoubleClick: Strong Version" -label "Increase Steps /\nStrong" -command ddIncSteps -doubleClickCommand ddIncStepsStrong;
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -st "textOnly" -bgc 0.9 0.8 0.5 -annotation "Decrease Steps / DoubleClick: Strong Version" -label "Decrease Steps /\nStrong" -command ddDecSteps -doubleClickCommand ddDecStepsStrong;
 
@@ -674,11 +757,13 @@ global proc ddPFXpanel()
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "paintEffectsTool.png" -bgc 0.3 0.3 0.3 -annotation "PFX Tool" -label "PFX Tool" -command PaintEffectsTool;  
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "paintFXtoPoly.png" -bgc 0.2 0.2 0.2 -annotation "Convert To Polygon" -label "Convert To Poly" -command ddPfxToPoly;
     
-    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.6 0.6 0.9 -annotation "Turn on Arnold vertex color export for selected objects" -label "Set Arnold \nVTX Color" -command ddArnoldVTXOn;
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.6 0.6 0.9 -annotation "Turn on Arnold vertex color export for selected objects, Assign Shader with Vertex Color node" -label "Set VTX Color \n/ VTX Color Shader" -command ddArnoldVTXOn -doubleClickCommand ddPFXAssignShaderVC;
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.3 0.3 0.5 -annotation "Unlimited Segments for the Selected PFX Strokes" -label "Unlimited PFX \nSegments" -command ddUnlimitedPFXSegments;
+    
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.3 0.3 0.5 -annotation "Paint Effects Based Intersection Detector" -label "PFX Intersection \nDetector" -command ddPFXIntersectionDetector;
-
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.3 0.3 0.5 -annotation "Set PfxToon Effect to Selected Camera" -label "Set PfxToon Effect \nto Selected Camera" -command ddPfxToCam;
+
+    iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "iconAndTextHorizontal" -image1 "textureEditor.png" -bgc 0.2 0.2 0.2 -annotation "UV Editor" -label "UV Editor" -command "TextureViewWindow;\n\nif (`window -ex polyTexturePlacementPanel1Window`)\nworkspaceControl -e -dockToControl polyTexturePlacementPanel1Window right UVToolkitDockControl;";     
     iconTextButton -fn "tinyBoldLabelFont" -fla 0 -mw 10 -st "textOnly" -image1 "paintFXtoPoly.png" -bgc 0.8 0.8 0.8 -annotation "Open PFX Library" -label "Open PFX Library" -command "source \"ddPFXLib.mel\"";
     
 }
